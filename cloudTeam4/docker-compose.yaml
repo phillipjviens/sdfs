@@ -1,0 +1,42 @@
+version: " 3 "
+services:
+  namenodeservice:
+    environment:
+      - bootstrap.memory_lock=true
+      - SESSION_DRIVER=apc
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 4000:4000
+    volumes:
+      - ./code/:/opt/app/
+      - ~/.aws/:/root/.aws/
+      - ./files/:/opt/app/files/
+    links:
+      - redisservice
+    privileged: true
+  datanodeservice:
+    environment:
+      - bootstrap.memory_lock=true
+      - SESSION_DRIVER=apc
+    build:
+      dockerfile: Dockerfile
+      context: .
+    ports:
+      - 5000:5000
+    volumes:
+      - ./code/:/opt/app/
+      - ~/.aws/:/root/.aws/
+      - ./files/:/opt/app/files/
+    links:
+      - namenodeservice
+      - redisservice
+    privileged: true
+    command: python datanode.py
+  redisservice:
+    ports:
+      - 6379:6379
+    image: redis
+    
+      
